@@ -1,0 +1,253 @@
+
+
+-- TIGER HUB: PREMIUM NEON DESIGN + SMOOTH DRAGGABLE TOGGLE BUTTONlocal TigerLib = {}local TweenService = game:GetService("TweenService")local UserInputService = game:GetService("UserInputService")local CoreGui = game:GetService("CoreGui")
+function TigerLib:CreateWindow(titleText)
+    local Window = {}
+    
+    -- Main Container
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "TigerHubPremium"
+    ScreenGui.Parent = CoreGui
+    ScreenGui.ResetOnSpawn = false
+    
+    -- ==================== MAIN PANEL ====================
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.fromOffset(540, 430)
+    MainFrame.Position = UDim2.new(0.5, -270, 0.5, -215)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(11, 11, 13)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.ClipsDescendants = true
+    MainFrame.Parent = ScreenGui
+    
+    local MainCorner = Instance.new("UICorner")
+    MainCorner.CornerRadius = UDim.new(0, 16)
+    MainCorner.Parent = MainFrame
+    
+    local MainStroke = Instance.new("UIStroke")
+    MainStroke.Color = Color3.fromRGB(242, 100, 25) -- Neon Tiger Orange
+    MainStroke.Thickness = 1.5
+    MainStroke.Parent = MainFrame
+
+    -- Helper: Smooth Dragging System (Applied to Frames/Buttons)
+    local function MakeSmoothDraggable(frame)
+        local dragging, dragInput, dragStart, startPos
+        frame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = frame.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then dragging = false end
+                end)
+            end
+        end)
+        frame.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                local delta = input.Position - dragStart
+                local targetPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+                TweenService:Create(frame, TweenInfo.new(0.12, Enum.EasingStyle.OutQuad), {Position = targetPos}):Play()
+            end
+        end)
+    end
+    
+    MakeSmoothDraggable(MainFrame)
+
+    -- Header Typography
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, -40, 0, 40)
+    Title.Position = UDim2.fromOffset(20, 15)
+    Title.BackgroundTransparency = 1
+    Title.Text = "🐯 " .. string.upper(titleText)
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 20
+    Title.Font = Enum.Font.GothamBold
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = MainFrame
+
+    -- Builder Control Panel 
+    local ControlPanel = Instance.new("Frame")
+    ControlPanel.Size = UDim2.new(1, -40, 0, 95)
+    ControlPanel.Position = UDim2.fromOffset(20, 65)
+    ControlPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+    ControlPanel.Parent = MainFrame
+    Instance.new("UICorner", ControlPanel).CornerRadius = UDim.new(0, 10)
+    Instance.new("UIStroke", ControlPanel).Color = Color3.fromRGB(30, 30, 35)
+
+    local NameInput = Instance.new("TextBox")
+    NameInput.Size = UDim2.new(0, 160, 0, 32)
+    NameInput.Position = UDim2.fromOffset(12, 12)
+    NameInput.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+    NameInput.PlaceholderText = "Script Reference Name"
+    NameInput.Text = ""
+    NameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NameInput.Font = Enum.Font.Gotham
+    NameInput.TextSize = 12
+    NameInput.Parent = ControlPanel
+    Instance.new("UICorner", NameInput).CornerRadius = UDim.new(0, 6)
+
+    local URLInput = Instance.new("TextBox")
+    URLInput.Size = UDim2.new(1, -204, 0, 32)
+    URLInput.Position = UDim2.fromOffset(184, 12)
+    URLInput.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+    URLInput.PlaceholderText = "Paste script link or loadstring..."
+    URLInput.Text = ""
+    URLInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    URLInput.Font = Enum.Font.Gotham
+    URLInput.TextSize = 12
+    URLInput.Parent = ControlPanel
+    Instance.new("UICorner", URLInput).CornerRadius = UDim.new(0, 6)
+
+    local BuildBtn = Instance.new("TextButton")
+    BuildBtn.Size = UDim2.new(1, -24, 0, 32)
+    BuildBtn.Position = UDim2.fromOffset(12, 52)
+    BuildBtn.BackgroundColor3 = Color3.fromRGB(242, 100, 25)
+    BuildBtn.Text = "DEPLOY CUSTOM LOADSTRING INTERFACE"
+    BuildBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    BuildBtn.Font = Enum.Font.GothamBold
+    BuildBtn.TextSize = 11
+    BuildBtn.Parent = ControlPanel
+    Instance.new("UICorner", BuildBtn).CornerRadius = UDim.new(0, 6)
+
+    -- Scroll List View Area
+    local Container = Instance.new("ScrollingFrame")
+    Container.Size = UDim2.new(1, -40, 1, -195)
+    Container.Position = UDim2.fromOffset(20, 180)
+    Container.BackgroundTransparency = 1
+    Container.CanvasSize = UDim2.new(0, 0, 0, 500)
+    Container.ScrollBarThickness = 2
+    Container.ScrollBarImageColor3 = Color3.fromRGB(242, 100, 25)
+    Container.Parent = MainFrame
+    
+    local ContentLayout = Instance.new("UIListLayout")
+    ContentLayout.Parent = Container
+    ContentLayout.Padding = UDim.new(0, 10)
+
+    -- ==================== ULTRA-SMOOTH FLOATING TOGGLE BUTTON ====================
+    local MenuButton = Instance.new("TextButton")
+    MenuButton.Size = UDim2.fromOffset(50, 50)
+    MenuButton.Position = UDim2.new(0.05, 0, 0.2, 0) -- Default floating spot
+    MenuButton.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+    MenuButton.Text = "🐯"
+    MenuButton.TextSize = 24
+    MenuButton.Parent = ScreenGui
+    
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(1, 0) -- Pure Circle
+    ButtonCorner.Parent = MenuButton
+    
+    local ButtonStroke = Instance.new("UIStroke")
+    ButtonStroke.Color = Color3.fromRGB(242, 100, 25)
+    ButtonStroke.Thickness = 2
+    ButtonStroke.Parent = MenuButton
+    
+    MakeSmoothDraggable(MenuButton)
+
+    -- Hide/Show System Engine Logic
+    local menuVisible = true
+    local originalSize = MainFrame.Size
+
+    MenuButton.MouseButton1Click:Connect(function()
+        menuVisible = not menuVisible
+        if menuVisible then
+            MainFrame.Visible = true
+            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = originalSize}):Play()
+            TweenService:Create(MainStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Thickness = 1.5}):Play()
+        else
+            local targetSize = UDim2.fromOffset(originalSize.X.Offset, 0)
+            local closeTween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = targetSize})
+            closeTween:Play()
+            closeTween.Completed:Connect(function()
+                if not menuVisible then MainFrame.Visible = false end
+            end)
+        end
+    end)
+
+    -- Toggle Component Factory
+    function Window:AddCustomScriptToggle(text, targetUrl)
+        local ToggleFrame = Instance.new("Frame")
+        ToggleFrame.Size = UDim2.new(1, -10, 0, 50)
+        ToggleFrame.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
+        ToggleFrame.Parent = Container
+        Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(0, 8)
+        
+        local FrameStroke = Instance.new("UIStroke")
+        FrameStroke.Color = Color3.fromRGB(35, 35, 40)
+        FrameStroke.Thickness = 1
+        FrameStroke.Parent = ToggleFrame
+        
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(1, -80, 1, 0)
+        Label.Position = UDim2.fromOffset(15, 0)
+        Label.BackgroundTransparency = 1
+        Label.Text = text
+        Label.TextColor3 = Color3.fromRGB(230, 230, 235)
+        Label.TextSize = 13
+        Label.Font = Enum.Font.GothamMedium
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.Parent = ToggleFrame
+        
+        local Switch = Instance.new("TextButton")
+        Switch.Size = UDim2.fromOffset(44, 22)
+        Switch.Position = UDim2.new(1, -60, 0.5, -11)
+        Switch.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+        Switch.Text = ""
+        Switch.Parent = ToggleFrame
+        Instance.new("UICorner", Switch).CornerRadius = UDim.new(1, 0)
+        
+        local SwitchStroke = Instance.new("UIStroke")
+        SwitchStroke.Color = Color3.fromRGB(50, 50, 55)
+        SwitchStroke.Parent = Switch
+        
+        local Dot = Instance.new("Frame")
+        Dot.Size = UDim2.fromOffset(14, 14)
+        Dot.Position = UDim2.fromOffset(4, 4)
+        Dot.BackgroundColor3 = Color3.fromRGB(150, 150, 160)
+        Dot.Parent = Switch
+        Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
+
+        local toggled = false
+        Switch.MouseButton1Click:Connect(function()
+            toggled = not toggled
+            
+            local targetBg = toggled and Color3.fromRGB(35, 20, 15) or Color3.fromRGB(30, 30, 35)
+            local targetDotColor = toggled and Color3.fromRGB(242, 100, 25) or Color3.fromRGB(150, 150, 160)
+            local targetDotPos = toggled and UDim2.fromOffset(26, 4) or UDim2.fromOffset(4, 4)
+            local targetBorder = toggled and Color3.fromRGB(242, 100, 25) or Color3.fromRGB(35, 35, 40)
+            
+            TweenService:Create(Switch, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {BackgroundColor3 = targetBg}):Play()
+            TweenService:Create(SwitchStroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {Color = targetDotColor}):Play()
+
+TweenService:Create(Dot, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {Position = targetDotPos, BackgroundColor3 = targetDotColor}):Play()
+TweenService:Create(FrameStroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {Color = targetBorder}):Play()
+if toggled then
+pcall(function()
+loadstring(game:HttpGet(targetUrl))()
+end)
+end
+end)
+end
+BuildBtn.MouseButton1Click:Connect(function()
+if NameInput.Text ~= "" and URLInput.Text ~= "" then
+Window:AddCustomScriptToggle(NameInput.Text, URLInput.Text)
+NameInput.Text = ""
+URLInput.Text = ""
+end
+end)
+return Window
+end
+-- Initialize Tiger Hub 🐯
+local TigerHubMain = TigerLib:CreateWindow("Tiger Hub")
+-- Static Presets
+TigerHubMain:AddCustomScriptToggle("System Admin Tools (Infinite Yield)", "githubusercontent.com")
+TigerHubMain:AddCustomScriptToggle("Universal Orca Utility Platform", "githubusercontent.com")
+
+
+
+
+
